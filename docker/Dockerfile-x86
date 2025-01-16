@@ -1,0 +1,48 @@
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+
+RUN export https_proxy="https://127.0.0.1:8118" && \
+    export http_proxy="http://127.0.0.1:8118"
+
+
+# Install system tools
+RUN apt-get update && apt-get install -y \
+    wget \
+    vim \
+    curl \
+    gnupg \
+    lsb-release \
+    python3-pip \
+    build-essential \
+    apt-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install ROS2 Humble
+# RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+COPY docker/ros-archive-keyring.gpg /usr/share/keyrings/ros-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-humble-desktop-full \
+    && rm -rf /var/lib/apt/lists/*
+
+# Update pip and install PyTorch
+RUN pip3 install --upgrade pip
+RUN pip3 install sympy --ignore-installed --extra-index-url https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip3 install numpy torch torchvision torchaudio --extra-index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
+# Set ROS environment variables
+ENV ROS_DOMAIN_ID=10
+ENV ROS_LOCALHOST_ONLY=1
+ENV LD_LIBRARY_PATH=/opt/ros/humble/lib:$LD_LIBRARY_PATH
+ENV PATH=/opt/ros/humble/bin:$PATH
+
+# Set working directory
+WORKDIR /workspace
+
+# Default command
+CMD ["/bin/bash"]
+
+# Usage Examples -------------------------------------------------------------------------------------------------------
+# t=registry.cn-hangzhou.aliyuncs.com/xustjcc/xustjcc:20251015-x86 && sudo docker build -f docker/Dockerfile-x86 --network=host -t $t .
