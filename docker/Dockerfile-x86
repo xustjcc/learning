@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip3 install --upgrade pip
 RUN pip3 install sympy --ignore-installed --extra-index-url https://pypi.tuna.tsinghua.edu.cn/simple
 RUN pip3 install numpy torch torchvision torchaudio --extra-index-url https://pypi.tuna.tsinghua.edu.cn/simple
+RUN echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc
 
 # Set ROS environment variables
 ENV ROS_DOMAIN_ID=10
@@ -46,3 +47,4 @@ CMD ["/bin/bash"]
 
 # Usage Examples -------------------------------------------------------------------------------------------------------
 # t=registry.cn-hangzhou.aliyuncs.com/xustjcc/xustjcc:20251015-x86 && sudo docker build -f docker/Dockerfile-x86 --network=host -t $t .
+# t=`docker ps -aq` && docker stop $t && docker rm $t

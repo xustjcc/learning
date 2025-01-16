@@ -3,7 +3,7 @@
 container_name="jcc"
 domain_id="10"
 
-if [ $(docker ps -aq) != "" ]; then
+if [ "$(docker ps -aq)" != "" ]; then
   docker stop $container_name
   docker rm $container_name
 fi
